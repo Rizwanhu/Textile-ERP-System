@@ -1,0 +1,130 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* TextileERP — dark industrial palette (DESIGN.md). All colors HSL. */
+    /* Surfaces */
+    --background: 215 28% 7%;          /* #0D1117 Layer 0 app shell */
+    --surface-1: 222 39% 11%;          /* #111827 Layer 1 page canvas */
+    --surface-2: 218 28% 16%;          /* #1C2535 Layer 2 card */
+    --surface-3: 218 28% 21%;          /* #243044 Layer 3 hover/input bg */
+
+    --foreground: 210 40% 96%;         /* #F1F5F9 text primary */
+    --foreground-muted: 215 20% 65%;   /* #94A3B8 text secondary */
+    --foreground-subtle: 218 25% 40%;  /* #4B6080 text tertiary */
+
+    --card: 218 28% 16%;
+    --card-foreground: 210 40% 96%;
+
+    --popover: 218 28% 16%;
+    --popover-foreground: 210 40% 96%;
+
+    /* Brand */
+    --primary: 217 91% 64%;            /* #4F8EF7 electric blue */
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 217 78% 56%;      /* #3A78E5 */
+
+    --secondary: 218 28% 21%;
+    --secondary-foreground: 210 40% 96%;
+
+    --muted: 222 39% 11%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 218 28% 21%;
+    --accent-foreground: 210 40% 96%;
+
+    /* Semantic */
+    --success: 142 71% 45%;            /* #22C55E */
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;             /* #F59E0B */
+    --warning-foreground: 0 0% 100%;
+    --danger: 0 84% 60%;               /* #EF4444 */
+    --danger-foreground: 0 0% 100%;
+    --info: 199 92% 60%;               /* #38BDF8 */
+    --info-foreground: 0 0% 100%;
+    --violet: 252 92% 76%;             /* #A78BFA */
+    --violet-foreground: 215 28% 7%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 31% 25%;             /* #2D3E55 */
+    --input: 215 31% 25%;
+    --ring: 217 91% 64%;
+
+    --radius: 0.75rem;                 /* 12px cards */
+
+    /* Chart series */
+    --chart-1: 217 91% 64%;
+    --chart-2: 142 71% 45%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 252 92% 76%;
+    --chart-5: 199 92% 60%;
+    --chart-6: 351 95% 71%;            /* #FB7185 */
+
+    /* Sidebar */
+    --sidebar-background: 215 28% 7%;
+    --sidebar-foreground: 215 20% 65%;
+    --sidebar-primary: 217 91% 64%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 218 28% 21%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 215 31% 25%;
+    --sidebar-ring: 217 91% 64%;
+
+    /* Effects */
+    --shadow-card: 0 1px 3px hsl(0 0% 0% / 0.4);
+    --shadow-card-hover: 0 4px 16px hsl(217 91% 64% / 0.08);
+    --shadow-drawer: -8px 0 32px hsl(0 0% 0% / 0.5);
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 64%), hsl(199 92% 60%));
+    --gradient-surface: linear-gradient(180deg, hsl(218 28% 16%), hsl(222 39% 11%));
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Tabular numbers for KPI / table cells */
+  .tabular,
+  table,
+  .kpi-value {
+    font-variant-numeric: tabular-nums;
+  }
+}
+
+@layer components {
+  .mono {
+    font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+    font-size: 0.8125rem;
+    letter-spacing: -0.01em;
+  }
+
+  .kpi-value {
+    @apply text-[2rem] font-bold leading-[1.1] text-foreground;
+  }
+
+  .section-header {
+    @apply text-lg font-semibold text-foreground;
+  }
+
+  .label-caption {
+    @apply text-xs font-medium text-muted-foreground uppercase tracking-wider;
+  }
+}
