@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { Link, useParams, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import {
   ArrowLeft, Download, Mail, MapPin, Package, Phone, Printer,
   Scissors, Shirt, ShoppingCart, Sparkles, Truck, User,
@@ -14,6 +14,7 @@ import { OrderWorkflow } from "@/components/orders/OrderWorkflow";
 import { cn } from "@/lib/utils";
 import { generateOrderPdf } from "@/lib/orderPdf";
 import { formatPKR, formatPKRDecimal } from "@/lib/currency";
+import { useClientAccounts } from "@/context/ClientAccountsContext";
 
 const fmtDate = (iso: string) =>
   new Date(iso).toLocaleDateString("en-US", { day: "2-digit", month: "short", year: "numeric" });
@@ -22,7 +23,9 @@ const daysUntil = (iso: string) => Math.ceil((new Date(iso).getTime() - Date.now
 
 export default function OrderDetailPage() {
   const { id = "" } = useParams();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
+  const { data: clientData } = useClientAccounts();
   const order = getOrderDetail(id);
   const fromQuery = searchParams.get("from") ?? "";
   const ordersBackHref = fromQuery ? `/orders?${decodeURIComponent(fromQuery)}` : "/orders";
@@ -62,6 +65,21 @@ export default function OrderDetailPage() {
   const rejectPct = order.produced ? +(order.rejected / order.produced * 100).toFixed(1) : 0;
   const currentStep = getCurrentStep(order);
   const workflow = getOrderWorkflow(order.id);
+
+  const clientAccountId = useMemo(() => {
+    const byOrder = clientData.lineItems.find((l) => l.orderId === order.id)?.clientId;
+    if (byOrder) return byOrder;
+    const byName = clientData.clients.find(
+      (c) => c.name.toLowerCase() === order.client.toLowerCase(),
+    )?.id;
+    return byName;
+  }, [clientData, order.id, order.client]);
+
+  const goToClientAccount = () => {
+    if (clientAccountId) {
+      navigate(`/orders/clients/${clientAccountId}${fromQuery ? `?from=${encodeURIComponent(fromQuery)}` : ""}`);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -103,8 +121,14 @@ export default function OrderDetailPage() {
             >
               <Printer className="h-4 w-4" /> Print
             </Button>
-            <Button variant="outline" size="sm" className="gap-2 border-border bg-card">
-              <Download className="h-4 w-4" /> Invoice
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-2 border-border bg-card"
+              disabled={!clientAccountId}
+              onClick={goToClientAccount}
+            >
+              <Download className="h-4 w-4" /> Client invoice
             </Button>
             <Button size="sm" className="gap-2 bg-primary text-primary-foreground hover:bg-primary-hover">
               <Sparkles className="h-4 w-4" /> Update Status

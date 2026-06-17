@@ -9,6 +9,8 @@ import { AppLayout } from "./components/layout/AppLayout";
 import PlaceholderPage from "./pages/PlaceholderPage.tsx";
 import OrdersPage from "./pages/orders/OrdersPage.tsx";
 import OrderDetailPage from "./pages/orders/OrderDetailPage.tsx";
+import ClientAccountPage from "./pages/orders/ClientAccountPage.tsx";
+import { ClientAccountsProvider } from "./context/ClientAccountsContext.tsx";
 import MaterialsPage from "./pages/materials/MaterialsPage.tsx";
 import ExpensesPage from "./pages/expenses/ExpensesPage.tsx";
 import InventoryPage from "./pages/inventory/InventoryPage.tsx";
@@ -31,9 +33,10 @@ const App = () => (
           <Route path="/auth" element={<AuthPage />} />
           <Route path="/login" element={<AuthPage initial="login" />} />
           <Route path="/signup" element={<AuthPage initial="signup" />} />
-          <Route element={<RequireAuth><AppLayout /></RequireAuth>}>
+          <Route element={<RequireAuth><ClientAccountsProvider><AppLayout /></ClientAccountsProvider></RequireAuth>}>
             <Route path="/" element={<Index />} />
             <Route path="/orders" element={<OrdersPage />} />
+            <Route path="/orders/clients/:clientId" element={<ClientAccountPage />} />
             <Route path="/orders/:id" element={<OrderDetailPage />} />
             <Route path="/materials" element={<MaterialsPage />} />
             <Route path="/inventory" element={<InventoryPage />} />
