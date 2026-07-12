@@ -1,26 +1,201 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-surface-1: hsl(var(--surface-1));
+  --color-surface-2: hsl(var(--surface-2));
+  --color-surface-3: hsl(var(--surface-3));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary-hover: hsl(var(--primary-hover));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-success: hsl(var(--success));
+  --color-success-foreground: hsl(var(--success-foreground));
+  --color-warning: hsl(var(--warning));
+  --color-warning-foreground: hsl(var(--warning-foreground));
+  --color-danger: hsl(var(--danger));
+  --color-danger-foreground: hsl(var(--danger-foreground));
+  --color-info: hsl(var(--info));
+  --color-info-foreground: hsl(var(--info-foreground));
+  --color-violet: hsl(var(--violet));
+  --color-violet-foreground: hsl(var(--violet-foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-sidebar-background: hsl(var(--sidebar-background));
+  --color-sidebar-foreground: hsl(var(--sidebar-foreground));
+  --color-sidebar-primary: hsl(var(--sidebar-primary));
+  --color-sidebar-primary-foreground: hsl(var(--sidebar-primary-foreground));
+  --color-sidebar-accent: hsl(var(--sidebar-accent));
+  --color-sidebar-accent-foreground: hsl(var(--sidebar-accent-foreground));
+  --color-sidebar-border: hsl(var(--sidebar-border));
+  --color-sidebar-ring: hsl(var(--sidebar-ring));
+
+  --background-image-gradient-primary: var(--gradient-primary);
+  --background-image-gradient-surface: var(--gradient-surface);
+
+  --shadow-card: var(--shadow-card);
+  --shadow-card-hover: var(--shadow-card-hover);
+  --shadow-drawer: var(--shadow-drawer);
 }
 
-@media (prefers-color-scheme: dark) {
+
+
+/* Definition of the design system. All colors, gradients, fonts, etc should be defined here. 
+All colors MUST be HSL.
+*/
+
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* TextileERP — dark industrial palette (DESIGN.md). All colors HSL. */
+    /* Surfaces */
+    --background: 215 28% 7%;          /* #0D1117 Layer 0 app shell */
+    --surface-1: 222 39% 11%;          /* #111827 Layer 1 page canvas */
+    --surface-2: 218 28% 16%;          /* #1C2535 Layer 2 card */
+    --surface-3: 218 28% 21%;          /* #243044 Layer 3 hover/input bg */
+
+    --foreground: 210 40% 96%;         /* #F1F5F9 text primary */
+    --foreground-muted: 215 20% 65%;   /* #94A3B8 text secondary */
+    --foreground-subtle: 218 25% 40%;  /* #4B6080 text tertiary */
+
+    --card: 218 28% 16%;
+    --card-foreground: 210 40% 96%;
+
+    --popover: 218 28% 16%;
+    --popover-foreground: 210 40% 96%;
+
+    /* Brand */
+    --primary: 217 91% 64%;            /* #4F8EF7 electric blue */
+    --primary-foreground: 0 0% 100%;
+    --primary-hover: 217 78% 56%;      /* #3A78E5 */
+
+    --secondary: 218 28% 21%;
+    --secondary-foreground: 210 40% 96%;
+
+    --muted: 222 39% 11%;
+    --muted-foreground: 215 20% 65%;
+
+    --accent: 218 28% 21%;
+    --accent-foreground: 210 40% 96%;
+
+    /* Semantic */
+    --success: 142 71% 45%;            /* #22C55E */
+    --success-foreground: 0 0% 100%;
+    --warning: 38 92% 50%;             /* #F59E0B */
+    --warning-foreground: 0 0% 100%;
+    --danger: 0 84% 60%;               /* #EF4444 */
+    --danger-foreground: 0 0% 100%;
+    --info: 199 92% 60%;               /* #38BDF8 */
+    --info-foreground: 0 0% 100%;
+    --violet: 252 92% 76%;             /* #A78BFA */
+    --violet-foreground: 215 28% 7%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    --border: 215 31% 25%;             /* #2D3E55 */
+    --input: 215 31% 25%;
+    --ring: 217 91% 64%;
+
+    --radius: 0.75rem;                 /* 12px cards */
+
+    /* Chart series */
+    --chart-1: 217 91% 64%;
+    --chart-2: 142 71% 45%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 252 92% 76%;
+    --chart-5: 199 92% 60%;
+    --chart-6: 351 95% 71%;            /* #FB7185 */
+
+    /* Sidebar */
+    --sidebar-background: 215 28% 7%;
+    --sidebar-foreground: 215 20% 65%;
+    --sidebar-primary: 217 91% 64%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 218 28% 21%;
+    --sidebar-accent-foreground: 210 40% 96%;
+    --sidebar-border: 215 31% 25%;
+    --sidebar-ring: 217 91% 64%;
+
+    /* Effects */
+    --shadow-card: 0 1px 3px hsl(0 0% 0% / 0.4);
+    --shadow-card-hover: 0 4px 16px hsl(217 91% 64% / 0.08);
+    --shadow-drawer: -8px 0 32px hsl(0 0% 0% / 0.5);
+    --gradient-primary: linear-gradient(135deg, hsl(217 91% 64%), hsl(199 92% 60%));
+    --gradient-surface: linear-gradient(180deg, hsl(218 28% 16%), hsl(222 39% 11%));
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Tabular numbers for KPI / table cells */
+  .tabular,
+  table,
+  .kpi-value {
+    font-variant-numeric: tabular-nums;
+  }
 }
+
+@layer components {
+  .mono {
+    font-family: "JetBrains Mono", "Fira Code", ui-monospace, monospace;
+    font-size: 0.8125rem;
+    letter-spacing: -0.01em;
+  }
+
+  .kpi-value {
+    font-size: 2rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: hsl(var(--foreground));
+  }
+
+  .section-header {
+    font-size: 1.125rem;
+    font-weight: 600;
+    color: hsl(var(--foreground));
+  }
+
+  .label-caption {
+    font-size: 0.75rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: hsl(var(--muted-foreground));
+  }
+}
+
+
+
