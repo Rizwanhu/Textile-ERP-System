@@ -2,7 +2,7 @@
 
 import { Bell, Search, Plus, LogOut, User as UserIcon, Settings as SettingsIcon, PanelLeft } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { Suspense, useState } from "react";
 import { AppSidebar } from "./AppSidebar";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,7 +26,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen w-full overflow-hidden bg-background">
       {/* Sidebar — real flex item, never overlaps */}
-      <AppSidebar open={sidebarOpen} />
+      <Suspense fallback={<aside className="h-full shrink-0 border-r border-sidebar-border bg-sidebar" style={{ width: sidebarOpen ? "16rem" : "3.5rem" }} />}>
+        <AppSidebar open={sidebarOpen} />
+      </Suspense>
 
       {/* Main content column */}
       <div className="flex flex-1 flex-col min-w-0 overflow-hidden">

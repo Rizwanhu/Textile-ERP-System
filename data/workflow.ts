@@ -59,6 +59,12 @@ function findOrder(orderId: string): Order | undefined {
   return ORDERS.find((o) => o.id === orderId);
 }
 
+/** Prefer a live order object when provided (e.g. from OrdersContext). */
+function resolveOrder(orderOrId: string | Order): Order | undefined {
+  if (typeof orderOrId === "string") return findOrder(orderOrId);
+  return orderOrId;
+}
+
 function findMaterialOrder(orderId: string): MaterialOrderSummary | undefined {
   return MATERIAL_ORDERS.find((m) => m.orderId === orderId);
 }
@@ -109,10 +115,13 @@ function stageStatusFromOrder(stage: StageKey, o: Order, blocked: boolean): Stag
  * full demo dataset (CUTTING / STITCHING / FINISHING). For other orders we
  * derive plausible mock values from order qty + material lines so every order
  * gets a coherent, end-to-end pipeline.
+ *
+ * Accepts an order id (looks up mock ORDERS) or a live Order object from context.
  */
-export function getOrderWorkflow(orderId: string): OrderWorkflow | undefined {
-  const o = findOrder(orderId);
+export function getOrderWorkflow(orderOrId: string | Order): OrderWorkflow | undefined {
+  const o = resolveOrder(orderOrId);
   if (!o) return undefined;
+  const orderId = o.id;
   const mat = findMaterialOrder(orderId);
   const isAnchor = orderId === "ORD-2026-024";
 
@@ -152,7 +161,7 @@ export function getOrderWorkflow(orderId: string): OrderWorkflow | undefined {
     {
       key: "local-buyer",
       label: "Local Supplier",
-      href: "/expenses/local-buyer",
+      href: `/expenses/orders/${orderId}?tab=local-buyer`,
       cost: buyerCost,
       status: stageStatusFromOrder("local-buyer", o, false),
       handoff: {
@@ -170,7 +179,7 @@ export function getOrderWorkflow(orderId: string): OrderWorkflow | undefined {
     {
       key: "cutting",
       label: "Cutting",
-      href: "/expenses/cutting",
+      href: `/expenses/orders/${orderId}?tab=cutting`,
       cost: cutWages,
       status: stageStatusFromOrder("cutting", o, cutBlocked),
       blocker: cutBlocked ? "No fabric received from Local Buyer." : undefined,
@@ -189,7 +198,7 @@ export function getOrderWorkflow(orderId: string): OrderWorkflow | undefined {
     {
       key: "stitching",
       label: "Stitching",
-      href: "/expenses/stitching",
+      href: `/expenses/orders/${orderId}?tab=stitching`,
       cost: stitchCost,
       status: stageStatusFromOrder("stitching", o, stitchBlocked),
       blocker: stitchBlocked ? "No cut pieces handed over from Cutting." : undefined,
@@ -208,7 +217,7 @@ export function getOrderWorkflow(orderId: string): OrderWorkflow | undefined {
     {
       key: "finishing",
       label: "Finishing & QC",
-      href: "/expenses/finishing",
+      href: `/expenses/orders/${orderId}?tab=finishing`,
       cost: finCost,
       status: stageStatusFromOrder("finishing", o, finishBlocked),
       blocker: finishBlocked ? "No stitched pieces handed over from Stitching." : undefined,

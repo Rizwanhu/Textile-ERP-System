@@ -163,3 +163,27 @@ export function getExpenseTotals() {
   const grand    = buyer + cutting + stitching + finishing + fixed + admin;
   return { buyer, cutting, stitching, finishing, fixed, admin, grand };
 }
+
+const ANCHOR_QTY = 1200;
+
+/** Scale fixed overhead allocation by order qty (anchor keeps full demo sheet). */
+export function fixedForOrder(orderId: string, qty: number): FixedExpenseRow[] {
+  if (orderId === "ORD-2026-024") return FIXED_EXPENSES;
+  const factor = Math.max(0.15, qty / ANCHOR_QTY);
+  return FIXED_EXPENSES.map((row) => ({
+    ...row,
+    id: `${row.id}-${orderId}`,
+    allocated: Math.round(row.allocated * factor),
+  }));
+}
+
+/** Scale admin costs by order qty (anchor keeps full demo sheet). */
+export function adminForOrder(orderId: string, qty: number): AdminExpenseRow[] {
+  if (orderId === "ORD-2026-024") return ADMIN_EXPENSES;
+  const factor = Math.max(0.15, qty / ANCHOR_QTY);
+  return ADMIN_EXPENSES.map((row) => ({
+    ...row,
+    id: `${row.id}-${orderId}`,
+    amount: Math.round(row.amount * factor),
+  }));
+}

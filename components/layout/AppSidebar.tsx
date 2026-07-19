@@ -17,8 +17,9 @@ import {
   ListOrdered,
 } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
-import { usePathname } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { parseExpenseTab } from "@/lib/expenseRoutes";
 
 interface AppSidebarProps {
   open: boolean;
@@ -48,21 +49,46 @@ const insightsNav = [
 
 export function AppSidebar({ open }: AppSidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const rawOrderTab = pathname.startsWith("/expenses/orders/")
+    ? searchParams.get("tab")
+    : null;
+
   const isActive = (url: string) => {
     if (url === "/") return pathname === "/";
-    if (url === "/expenses/orders") return pathname === "/expenses/orders" || pathname.startsWith("/expenses/orders/");
-    if (url === "/expenses/suppliers") return pathname === "/expenses/suppliers" || pathname.startsWith("/expenses/suppliers/");
+    if (url === "/expenses/orders") {
+      return (
+        pathname === "/expenses/orders" ||
+        (pathname.startsWith("/expenses/orders/") && (!rawOrderTab || rawOrderTab === "local-buyer"))
+      );
+    }
+    if (url === "/expenses/suppliers") {
+      return pathname === "/expenses/suppliers" || pathname.startsWith("/expenses/suppliers/");
+    }
+    // Keep Cutting / Stitching / … highlighted when drilling into that order sheet
+    if (
+      url.startsWith("/expenses/") &&
+      pathname.startsWith("/expenses/orders/") &&
+      rawOrderTab &&
+      rawOrderTab !== "local-buyer"
+    ) {
+      return url === `/expenses/${parseExpenseTab(rawOrderTab)}`;
+    }
     return pathname === url || pathname.startsWith(`${url}/`);
   };
 
-  const renderItem = (item: { title: string; url: string; icon: typeof LayoutDashboard }) => (
+  const activeItemClass =
+    "!bg-primary/10 !text-primary font-medium before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-[3px] before:rounded-r-full before:bg-primary";
+
+  const renderItem = (item: { title: string; url: string; icon: typeof LayoutDashboard }) => {
+    const active = isActive(item.url);
+    return (
     <li key={item.url}>
       {open ? (
         <NavLink
           href={item.url}
           end={item.url === "/"}
-          className="relative flex items-center gap-3 rounded-md px-3 py-2 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-          activeClassName="!bg-primary/10 !text-primary font-medium before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-[3px] before:rounded-r-full before:bg-primary"
+          className={`relative flex items-center gap-3 rounded-md px-3 py-2 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${active ? activeItemClass : ""}`}
         >
           <item.icon className="h-[18px] w-[18px] shrink-0" />
           <span className="truncate">{item.title}</span>
@@ -74,9 +100,8 @@ export function AppSidebar({ open }: AppSidebarProps) {
               href={item.url}
               end={item.url === "/"}
               className={`relative flex items-center justify-center rounded-md p-2 text-sm text-sidebar-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground ${
-                isActive(item.url) ? "bg-primary/10 text-primary before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-[3px] before:rounded-r-full before:bg-primary" : ""
+                active ? "bg-primary/10 text-primary before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-[3px] before:rounded-r-full before:bg-primary" : ""
               }`}
-              activeClassName="!bg-primary/10 !text-primary before:absolute before:left-0 before:top-1/2 before:-translate-y-1/2 before:h-5 before:w-[3px] before:rounded-r-full before:bg-primary"
             >
               <item.icon className="h-[18px] w-[18px] shrink-0" />
             </NavLink>
@@ -85,7 +110,8 @@ export function AppSidebar({ open }: AppSidebarProps) {
         </Tooltip>
       )}
     </li>
-  );
+    );
+  };
 
   const SectionLabel = ({ label }: { label: string }) =>
     open ? (

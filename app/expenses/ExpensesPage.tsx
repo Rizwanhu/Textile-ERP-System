@@ -2,17 +2,25 @@
 
 import { useCallback, useMemo, useState } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import { Plus, Download, ArrowRight, FileText } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { formatPKR } from "@/lib/currency";
-import { getExpenseTotals } from "@/data/expenses";
+import {
+  adminForOrder,
+  fixedForOrder,
+  getExpenseTotals,
+  sumAdmin,
+  sumFixed,
+} from "@/data/expenses";
 import { NewExpenseDialog, type ExpenseCategory } from "@/components/expenses/NewExpenseDialog";
 import { ExpenseDialogContext } from "./expense-dialog-context";
 import { generateExpensesPdf } from "@/lib/expensePdf";
 import { ExpenseCategoryPanels, EXPENSE_TABS } from "@/components/expenses/ExpenseCategoryPanels";
-import { expenseTabPath, parseExpenseTab } from "@/lib/expenseRoutes";
+import { expenseTabPath, orderExpensePath, parseExpenseTab } from "@/lib/expenseRoutes";
+import { getOrderWorkflow } from "@/data/workflow";
+import type { Order } from "@/data/orders";
 
 const TAB_ICONS: Record<ExpenseCategory, string> = {
   "local-buyer": "💼",
@@ -27,29 +35,44 @@ type Props = {
   /** Override tab from route param */
   pathTab?: string;
   orderId?: string;
+  order?: Order;
   orderLabel?: string;
   backHref?: string;
 };
 
-export function ExpensesPage({ pathTab, orderId, orderLabel, backHref }: Props = {}) {
+export function ExpensesPage({ pathTab, orderId, order, orderLabel, backHref }: Props = {}) {
   const router = useRouter();
   const params = useParams();
+  const searchParams = useSearchParams();
   const routeTab = pathTab ?? (params?.tab as string | undefined);
   const tab = parseExpenseTab(routeTab);
+  const from = searchParams.get("from") ?? undefined;
 
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogCategory, setDialogCategory] = useState<ExpenseCategory>(tab);
-  const totals = useMemo(() => getExpenseTotals(), []);
+
+  const totals = useMemo(() => {
+    if (!orderId || !order) return getExpenseTotals();
+    const wf = getOrderWorkflow(order);
+    const buyer = wf?.stages.find((s) => s.key === "local-buyer")?.cost ?? 0;
+    const cutting = wf?.stages.find((s) => s.key === "cutting")?.cost ?? 0;
+    const stitching = wf?.stages.find((s) => s.key === "stitching")?.cost ?? 0;
+    const finishing = wf?.stages.find((s) => s.key === "finishing")?.cost ?? 0;
+    const fixed = sumFixed(fixedForOrder(orderId, order.qty));
+    const admin = sumAdmin(adminForOrder(orderId, order.qty));
+    const grand = buyer + cutting + stitching + finishing + fixed + admin;
+    return { buyer, cutting, stitching, finishing, fixed, admin, grand };
+  }, [order, orderId]);
 
   const setTab = useCallback(
     (next: ExpenseCategory) => {
       if (orderId) {
-        router.replace(`/expenses/orders/${orderId}?tab=${next}`);
+        router.replace(orderExpensePath(orderId, next, from));
         return;
       }
       router.replace(expenseTabPath(next));
     },
-    [orderId, router],
+    [from, orderId, router],
   );
 
   const openDialog = useCallback(
@@ -62,8 +85,11 @@ export function ExpensesPage({ pathTab, orderId, orderLabel, backHref }: Props =
 
   const closeDialog = useCallback(() => setDialogOpen(false), []);
 
-  const displayOrder = orderId ?? "ORD-2026-024";
-  const displayLabel = orderLabel ?? "Crew Neck Tee — Northwind Apparel";
+  const displayOrder = orderId ?? "—";
+  const displayLabel = orderLabel ?? "Select an order to view expenses";
+  const backLabel = backHref?.startsWith("/expenses/") && backHref !== "/expenses/orders"
+    ? "← Back to category"
+    : "← Back to orders";
 
   return (
     <ExpenseDialogContext.Provider value={{ open: dialogOpen, category: dialogCategory, openDialog, closeDialog }}>
@@ -81,7 +107,7 @@ export function ExpensesPage({ pathTab, orderId, orderLabel, backHref }: Props =
           <div className="flex flex-wrap gap-2">
             {backHref && (
               <Button asChild variant="ghost" size="sm" className="text-muted-foreground">
-                <Link href={backHref}>← Back to orders</Link>
+                <Link href={backHref}>{backLabel}</Link>
               </Button>
             )}
             <Button variant="outline" className="gap-2 border-border" onClick={() => generateExpensesPdf()}>
@@ -117,25 +143,27 @@ export function ExpensesPage({ pathTab, orderId, orderLabel, backHref }: Props =
           </TabsList>
 
           <div className="mt-4">
-            <ExpenseCategoryPanels tab={tab} orderLabel={orderLabel} />
+            <ExpenseCategoryPanels tab={tab} orderId={orderId} order={order} orderLabel={orderLabel} />
           </div>
         </Tabs>
 
-        <div className="flex items-center justify-between rounded-xl border border-border bg-card px-5 py-4">
-          <div className="flex items-center gap-3">
-            <FileText className="h-5 w-5 text-primary" />
-            <div>
-              <p className="text-sm font-semibold text-foreground">Linked production order</p>
-              <p className="text-xs text-muted-foreground">{displayLabel}</p>
+        {orderId && (
+          <div className="flex items-center justify-between rounded-xl border border-border bg-card px-5 py-4">
+            <div className="flex items-center gap-3">
+              <FileText className="h-5 w-5 text-primary" />
+              <div>
+                <p className="text-sm font-semibold text-foreground">Linked production order</p>
+                <p className="text-xs text-muted-foreground">{displayLabel}</p>
+              </div>
             </div>
+            <Link
+              href={`/orders/${orderId}`}
+              className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary-hover"
+            >
+              View order <ArrowRight className="h-4 w-4" />
+            </Link>
           </div>
-          <Link
-            href={`/orders/${displayOrder}`}
-            className="inline-flex items-center gap-1 text-sm font-semibold text-primary hover:text-primary-hover"
-          >
-            View order <ArrowRight className="h-4 w-4" />
-          </Link>
-        </div>
+        )}
       </div>
 
       <NewExpenseDialog open={dialogOpen} onOpenChange={setDialogOpen} defaultCategory={dialogCategory} />
